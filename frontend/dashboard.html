@@ -279,7 +279,7 @@
       if (username && password) {
         showLoading();
         try {
-          const response = await fetch('http://localhost:3000/fetch-class-attendance', {
+          const response = await fetch('/fetch-class-attendance', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json'
@@ -319,7 +319,7 @@
       
       showLoading();
       try {
-        const response = await fetch('http://localhost:3000/fetch-class-attendance', {
+        const response = await fetch('/fetch-class-attendance', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
