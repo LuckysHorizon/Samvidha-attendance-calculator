@@ -44,7 +44,7 @@
       loader.classList.remove('hidden');
 
       try {
-        const response = await fetch('http://localhost:3000/fetch-attendance', {
+        const response = await fetch('/fetch-attendance', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ username, password })
