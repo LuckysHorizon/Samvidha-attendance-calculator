@@ -11,10 +11,11 @@ console.log('Environment variables:', {
   PATH: process.env.PATH
 });
 
-// Try multiple possible paths for the Chrome binary, prioritizing /usr/bin/chrome
+// Try multiple possible paths for the Chrome binary, prioritizing /usr/local/bin/chrome
 const possibleChromePaths = [
-  process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chrome',
-  '/opt/render/project/chrome/chrome-linux64/chrome',
+  process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/local/bin/chrome',
+  '/opt/render/project/src/chrome/chrome-linux64/chrome',
+  '/usr/bin/chrome',
   '/usr/bin/chromium-browser',
   '/usr/bin/chromium',
   '/usr/lib/chromium-browser/chromium-browser',
@@ -32,10 +33,10 @@ for (const path of possibleChromePaths) {
 
 if (!chromePath) {
   console.error('No Chrome binary found in any of the possible paths:', possibleChromePaths);
-  // Additional debugging: list contents of /usr/bin and /opt/render/project/chrome
+  // Additional debugging: list contents of /usr/local/bin and /opt/render/project/src/chrome
   try {
-    console.log('Contents of /usr/bin:', fs.readdirSync('/usr/bin'));
-    console.log('Contents of /opt/render/project/chrome:', fs.readdirSync('/opt/render/project/chrome') || 'Directory not found');
+    console.log('Contents of /usr/local/bin:', fs.readdirSync('/usr/local/bin'));
+    console.log('Contents of /opt/render/project/src/chrome:', fs.readdirSync('/opt/render/project/src/chrome') || 'Directory not found');
   } catch (error) {
     console.error('Error listing directories:', error.message);
   }
