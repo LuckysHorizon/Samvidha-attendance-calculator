@@ -50,13 +50,15 @@
           body: JSON.stringify({ username, password })
         });
 
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({}));
+          throw new Error(errorData.error || `HTTP error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
 
         if (data.error) {
-          loader.classList.add('hidden');
-          errorP.textContent = data.error;
-          errorP.classList.remove('hidden');
-          return;
+          throw new Error(data.error);
         }
 
         // Save credentials to localStorage
@@ -66,8 +68,9 @@
         window.location.href = 'dashboard.html';
       } catch (error) {
         loader.classList.add('hidden');
-        errorP.textContent = 'An error occurred while fetching data. Please try again.';
+        errorP.textContent = `Error: ${error.message}`;
         errorP.classList.remove('hidden');
+        console.error('Fetch error:', error);
       }
     });
   </script>
