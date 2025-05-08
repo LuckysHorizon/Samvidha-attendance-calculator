@@ -6,7 +6,7 @@
   "scripts": {
     "start": "cd backend && node server.js",
     "dev": "nodemon backend/server.js",
-    "postinstall": "npx puppeteer browsers install chrome" 
+
   },
   "dependencies": {
     "cors": "^2.8.5",
