@@ -3,7 +3,7 @@ services:
     name: samvidha-attendance-calculator
     env: node
     plan: free
-    buildCommand: npm install
+    buildCommand: npm install && npx puppeteer browsers install chrome
     startCommand: npm start
     preDeploy:
       - apt-get update
@@ -11,3 +11,7 @@ services:
     envVars:
       - key: PORT
         value: 10000
+      - key: PUPPETEER_CACHE_DIR
+        value: /opt/render/project/src/.cache/puppeteer
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: false
