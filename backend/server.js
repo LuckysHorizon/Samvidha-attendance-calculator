@@ -1,6 +1,7 @@
 const express = require('express');
 const puppeteer = require('puppeteer');
 const cors = require('cors');
+const path = require('path'); // Add this line to import the path module
 require('dotenv').config();
 
 const app = express();
