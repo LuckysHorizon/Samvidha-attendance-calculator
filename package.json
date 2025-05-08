@@ -2,10 +2,10 @@
   "name": "attendance-calculator",
   "version": "1.0.0",
   "description": "Attendance Calculator Web Application",
-  "main": "server.js",
+  "main": "backend/server.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
+    "start": "cd backend && node server.js",
+    "dev": "nodemon backend/server.js"
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -19,4 +19,4 @@
   "engines": {
     "node": ">=14.0.0"
   }
-} 
+}
