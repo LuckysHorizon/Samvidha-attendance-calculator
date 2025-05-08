@@ -5,9 +5,16 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
+// Log environment variables for debugging
+console.log('Environment variables:', {
+  PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH,
+  PATH: process.env.PATH
+});
+
 // Try multiple possible paths for the Chrome binary, prioritizing /usr/bin/chrome
 const possibleChromePaths = [
   process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chrome',
+  '/opt/render/project/chrome/chrome-linux64/chrome',
   '/usr/bin/chromium-browser',
   '/usr/bin/chromium',
   '/usr/lib/chromium-browser/chromium-browser',
@@ -25,6 +32,13 @@ for (const path of possibleChromePaths) {
 
 if (!chromePath) {
   console.error('No Chrome binary found in any of the possible paths:', possibleChromePaths);
+  // Additional debugging: list contents of /usr/bin and /opt/render/project/chrome
+  try {
+    console.log('Contents of /usr/bin:', fs.readdirSync('/usr/bin'));
+    console.log('Contents of /opt/render/project/chrome:', fs.readdirSync('/opt/render/project/chrome') || 'Directory not found');
+  } catch (error) {
+    console.error('Error listing directories:', error.message);
+  }
 } else {
   console.log('Chrome binary found at:', chromePath);
   process.env.PUPPETEER_EXECUTABLE_PATH = chromePath;
