@@ -19,11 +19,20 @@ app.get('/', (req, res) => {
 
 // Helper function to login and get browser session
 async function loginToSamvidha(username, password) {
-  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox'] });
+  const browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-accelerated-2d-canvas',
+      '--no-first-run',
+      '--no-zygote',
+      '--disable-gpu'],
+             executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || undefined                            
+      });
+  console.log('Browser launched successfully');
   const page = await browser.newPage();
 
   // Navigate to login page
-  await page.goto('https://samvidha.iare.ac.in/', { waitUntil: 'networkidle2' });
+  await page.goto('https://samvidha.iare.ac.in/', { waitUntil: 'networkidle2',timeout: 60000 });
 
   // Enter credentials
   await page.type('input[name="txt_uname"]', username);
