@@ -3,7 +3,7 @@ services:
     name: samvidha-attendance-calculator
     env: node
     plan: free
-    buildCommand: bash -c "npm install && apt-get update && apt-get install -y wget unzip && mkdir -p /opt/chrome && wget -O /tmp/chrome-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.204/linux64/chrome-linux64.zip && unzip /tmp/chrome-linux64.zip -d /opt/chrome && chmod +x /opt/chrome/chrome-linux64/chrome && ln -sf /opt/chrome/chrome-linux64/chrome /usr/bin/chrome && which chrome || echo 'Chrome binary not found' && ls -l /usr/bin/chrome || echo 'Chrome binary not found in /usr/bin'"
+    buildCommand: bash -c "npm install && apt-get update && apt-get install -y wget unzip && mkdir -p /opt/render/project/chrome && wget -O /tmp/chrome-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.204/linux64/chrome-linux64.zip && echo 'Download completed' || echo 'Failed to download Chrome' && unzip /tmp/chrome-linux64.zip -d /opt/render/project/chrome && echo 'Unzip completed' || echo 'Failed to unzip Chrome' && chmod +x /opt/render/project/chrome/chrome-linux64/chrome && echo 'Chmod completed' || echo 'Failed to set executable permissions' && ln -sf /opt/render/project/chrome/chrome-linux64/chrome /usr/bin/chrome && echo 'Symlink created' || echo 'Failed to create Chrome symlink' && which chrome || echo 'Chrome binary not found' && ls -l /usr/bin/chrome || echo 'Chrome binary not found in /usr/bin'"
     startCommand: npm start
     envVars:
       - key: PORT
