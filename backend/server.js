@@ -8,6 +8,13 @@ const port = process.env.PORT || 3000;
 
 app.use(cors());
 app.use(express.json());
+// Serve static files from the 'frontend' folder
+app.use(express.static(path.join(__dirname, '../frontend')));
+
+// Serve index.html for the root URL
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
 
 // Helper function to login and get browser session
 async function loginToSamvidha(username, password) {
