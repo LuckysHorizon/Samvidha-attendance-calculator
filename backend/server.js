@@ -5,9 +5,10 @@ const path = require('path');
 const fs = require('fs');
 require('dotenv').config();
 
-// Try multiple possible paths for the Chrome binary
+// Try multiple possible paths for the Chrome binary, prioritizing /usr/bin/chrome
 const possibleChromePaths = [
-  process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium-browser',
+  process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chrome',
+  '/usr/bin/chromium-browser',
   '/usr/bin/chromium',
   '/usr/lib/chromium-browser/chromium-browser',
   '/usr/lib/chromium/chromium'
