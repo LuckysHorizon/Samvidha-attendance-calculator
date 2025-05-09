@@ -6,7 +6,7 @@
   "scripts": {
     "start": "cd backend && node server.js",
     "dev": "nodemon backend/server.js",
-    "postinstall": "npx puppeteer browsers install chrome --path /opt/render/.cache/puppeteer"
+    "postinstall": "npx puppeteer browsers install chrome"
   },
   "engines": {
     "node": ">=14.0.0"
