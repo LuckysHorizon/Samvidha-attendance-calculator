@@ -5,8 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "cd backend && node server.js",
-    "dev": "nodemon backend/server.js",
-    "postinstall": "cd backend && npx puppeteer browsers install chrome"
+    "dev": "nodemon backend/server.js"
   },
   "engines": {
     "node": ">=14.0.0"
