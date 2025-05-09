@@ -12,8 +12,31 @@ const port = process.env.PORT || 3000;
 app.use(cors());
 app.use(express.json());
 
+// Helper function to find Chrome binary
+async function findChromeBinary() {
+  const possiblePaths = [
+    process.env.CHROME_BIN,
+    process.env.PUPPETEER_EXECUTABLE_PATH,
+    '/opt/render/.cache/puppeteer/chrome/linux-131.0.6778.204/chrome-linux64/chrome',
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser'
+  ];
+
+  for (const chromePath of possiblePaths) {
+    if (chromePath && fs.existsSync(chromePath)) {
+      return chromePath;
+    }
+  }
+
+  // If no binary found, let Puppeteer handle it
+  return null;
+}
+
 // Helper function to login and get browser session
 async function loginToSamvidha(username, password) {
+  const chromePath = await findChromeBinary();
+  console.log('Using Chrome binary at:', chromePath);
+
   const launchOptions = {
     headless: 'new',
     args: [
@@ -26,38 +49,42 @@ async function loginToSamvidha(username, password) {
     ]
   };
 
-  // Add executable path if running on Render
-  if (process.env.CHROME_BIN) {
-    launchOptions.executablePath = process.env.CHROME_BIN;
+  if (chromePath) {
+    launchOptions.executablePath = chromePath;
   }
 
-  const browser = await puppeteer.launch(launchOptions);
-  const page = await browser.newPage();
+  try {
+    const browser = await puppeteer.launch(launchOptions);
+    const page = await browser.newPage();
 
-  // Set viewport
-  await page.setViewport({ width: 1920, height: 1080 });
+    // Set viewport
+    await page.setViewport({ width: 1920, height: 1080 });
 
-  // Set user agent
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
+    // Set user agent
+    await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
 
-  // Navigate to login page
-  await page.goto('https://samvidha.iare.ac.in/', { waitUntil: 'networkidle2' });
+    // Navigate to login page
+    await page.goto('https://samvidha.iare.ac.in/', { waitUntil: 'networkidle2' });
 
-  // Enter credentials
-  await page.type('input[name="txt_uname"]', username);
-  await page.type('input[name="txt_pwd"]', password);
-  await page.click('button#but_submit');
+    // Enter credentials
+    await page.type('input[name="txt_uname"]', username);
+    await page.type('input[name="txt_pwd"]', password);
+    await page.click('button#but_submit');
 
-  // Wait for navigation
-  await page.waitForNavigation({ waitUntil: 'networkidle2' });
+    // Wait for navigation
+    await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-  // Check for login failure
-  if (page.url().includes('login')) {
-    await browser.close();
-    throw new Error('Invalid credentials');
+    // Check for login failure
+    if (page.url().includes('login')) {
+      await browser.close();
+      throw new Error('Invalid credentials');
+    }
+
+    return { browser, page };
+  } catch (error) {
+    console.error('Error launching browser:', error);
+    throw new Error(`Failed to launch browser: ${error.message}`);
   }
-
-  return { browser, page };
 }
 
 app.post('/fetch-attendance', async (req, res) => {
