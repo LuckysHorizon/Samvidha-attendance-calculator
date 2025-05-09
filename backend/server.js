@@ -1,8 +1,9 @@
 const express = require('express');
-const puppeteer = require('puppeteer'); // Use puppeteer instead of puppeteer-core
+const puppeteer = require('puppeteer');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
+const glob = require('glob');
 require('dotenv').config();
 
 const app = express();
@@ -20,20 +21,38 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
+// Helper function to find Chrome binary dynamically
+function findChromeBinary() {
+  const cacheDir = process.env.PUPPETEER_CACHE_DIR || '/opt/render/.cache/puppeteer';
+  const defaultPath = process.env.PUPPETEER_EXECUTABLE_PATH || `${cacheDir}/chrome/linux-*/chrome-linux64/chrome`;
+
+  console.log('Looking for Chrome binary in:', defaultPath);
+
+  const files = glob.sync(defaultPath);
+  if (files.length === 0) {
+    throw new Error(`No Chrome binary found in ${cacheDir}/chrome. Ensure Puppeteer installed Chrome correctly.`);
+  }
+
+  const chromePath = files[0];
+  console.log('Found Chrome binary at:', chromePath);
+
+  if (!fs.existsSync(chromePath)) {
+    throw new Error(`Chrome binary not found at ${chromePath}. Please ensure the binary exists.`);
+  }
+
+  return chromePath;
+}
+
 // Helper function to login and get browser session
 async function loginToSamvidha(username, password) {
-  // Debugging: Log environment variables and check if Chrome binary exists
+  // Debugging: Log environment variables
   console.log('PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
   console.log('PUPPETEER_CACHE_DIR:', process.env.PUPPETEER_CACHE_DIR);
 
-  const chromePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/opt/render/.cache/puppeteer/chrome/linux-131.0.6778.204/chrome-linux64/chrome';
-  
-  if (!fs.existsSync(chromePath)) {
-    throw new Error(`Chrome binary not found at ${chromePath}. Please ensure the binary exists and the path is correct.`);
-  }
+  const chromePath = findChromeBinary();
 
   const browser = await puppeteer.launch({
-    executablePath: chromePath, // Explicitly set the Chrome binary path
+    executablePath: chromePath,
     headless: true,
     args: [
       '--no-sandbox',
