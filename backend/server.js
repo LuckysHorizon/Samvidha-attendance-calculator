@@ -1,49 +1,8 @@
 const express = require('express');
-const puppeteer = require('puppeteer-core');
+const puppeteer = require('puppeteer'); // Use puppeteer instead of puppeteer-core
 const cors = require('cors');
 const path = require('path');
-const fs = require('fs');
 require('dotenv').config();
-
-// Log environment variables for debugging
-console.log('Environment variables:', {
-  PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH,
-  PATH: process.env.PATH
-});
-
-// Try multiple possible paths for the Chrome binary, prioritizing /usr/local/bin/chrome
-const possibleChromePaths = [
-  process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/local/bin/chrome',
-  '/opt/render/project/src/chrome/chrome-linux64/chrome',
-  '/usr/bin/chrome',
-  '/usr/bin/chromium-browser',
-  '/usr/bin/chromium',
-  '/usr/lib/chromium-browser/chromium-browser',
-  '/usr/lib/chromium/chromium'
-];
-
-// Find the first existing Chrome binary path
-let chromePath = null;
-for (const path of possibleChromePaths) {
-  if (fs.existsSync(path)) {
-    chromePath = path;
-    break;
-  }
-}
-
-if (!chromePath) {
-  console.error('No Chrome binary found in any of the possible paths:', possibleChromePaths);
-  // Additional debugging: list contents of /usr/local/bin and /opt/render/project/src/chrome
-  try {
-    console.log('Contents of /usr/local/bin:', fs.readdirSync('/usr/local/bin'));
-    console.log('Contents of /opt/render/project/src/chrome:', fs.readdirSync('/opt/render/project/src/chrome') || 'Directory not found');
-  } catch (error) {
-    console.error('Error listing directories:', error.message);
-  }
-} else {
-  console.log('Chrome binary found at:', chromePath);
-  process.env.PUPPETEER_EXECUTABLE_PATH = chromePath;
-}
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -62,15 +21,8 @@ app.get('/', (req, res) => {
 
 // Helper function to login and get browser session
 async function loginToSamvidha(username, password) {
-  console.log('Launching Puppeteer with executable path:', process.env.PUPPETEER_EXECUTABLE_PATH);
-
-  if (!process.env.PUPPETEER_EXECUTABLE_PATH) {
-    throw new Error('PUPPETEER_EXECUTABLE_PATH is not set. Chrome binary not found.');
-  }
-
   const browser = await puppeteer.launch({
     headless: true,
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
