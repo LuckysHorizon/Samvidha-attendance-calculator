@@ -23,7 +23,7 @@ app.get('/', (req, res) => {
 
 // Helper function to find Chrome binary dynamically
 function findChromeBinary() {
-  const cacheDir = process.env.PUPPETEER_CACHE_DIR || '/opt/render/.cache/puppeteer';
+  const cacheDir = process.env.PUPPETEER_CACHE_DIR || '/opt/render/.cache/puppeteer/chrome';
   const defaultPath = process.env.PUPPETEER_EXECUTABLE_PATH || `${cacheDir}/chrome/linux-*/chrome-linux64/chrome`;
 
   console.log('Looking for Chrome binary in:', defaultPath);
