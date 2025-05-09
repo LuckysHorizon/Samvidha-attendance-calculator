@@ -3,10 +3,8 @@ services:
     name: samvidha-attendance-calculator
     env: node
     plan: free
-    buildCommand: bash -c "npm install && apt-get update && apt-get install -y wget unzip && mkdir -p /opt/render/project/src/chrome && (wget -O /tmp/chrome-linux64.zip https://storage.googleapis.com/chrome-for-testing-public/131.0.6778.204/linux64/chrome-linux64.zip && echo 'Download completed' || (echo 'Failed to download Chrome' && exit 1)) && (unzip /tmp/chrome-linux64.zip -d /opt/render/project/src/chrome && echo 'Unzip completed' || (echo 'Failed to unzip Chrome' && exit 1)) && (chmod +x /opt/render/project/src/chrome/chrome-linux64/chrome && echo 'Chmod completed' || (echo 'Failed to set executable permissions' && exit 1)) && (ln -sf /opt/render/project/src/chrome/chrome-linux64/chrome /usr/local/bin/chrome && echo 'Symlink created' || (echo 'Failed to create Chrome symlink' && exit 1)) && (which chrome || echo 'Chrome binary not found') && (ls -l /usr/local/bin/chrome || echo 'Chrome binary not found in /usr/local/bin')"
+    buildCommand: npm install
     startCommand: npm start
     envVars:
       - key: PORT
         value: 10000
-      - key: PUPPETEER_EXECUTABLE_PATH
-        value: /usr/local/bin/chrome
