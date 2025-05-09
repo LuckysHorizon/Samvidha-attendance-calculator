@@ -23,21 +23,12 @@ app.get('/', (req, res) => {
 
 // Helper function to find Chrome binary dynamically
 function findChromeBinary() {
-  const cacheDir = process.env.PUPPETEER_CACHE_DIR || '/opt/render/.cache/puppeteer';
-  const defaultPath = process.env.PUPPETEER_EXECUTABLE_PATH || `${cacheDir}/chrome/linux-*/chrome-linux64/chrome`;
+  const chromePath = puppeteer.executablePath();
 
-  console.log('Looking for Chrome binary in:', defaultPath);
-
-  const files = glob.sync(defaultPath);
-  if (files.length === 0) {
-    throw new Error(`No Chrome binary found in ${cacheDir}/chrome. Ensure Puppeteer installed Chrome correctly.`);
-  }
-
-  const chromePath = files[0];
-  console.log('Found Chrome binary at:', chromePath);
+  console.log('Resolved Chrome path:', chromePath);
 
   if (!fs.existsSync(chromePath)) {
-    throw new Error(`Chrome binary not found at ${chromePath}. Please ensure the binary exists.`);
+    throw new Error(`Chrome binary not found at ${chromePath}. Make sure Puppeteer installed Chrome correctly.`);
   }
 
   return chromePath;
