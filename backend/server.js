@@ -9,84 +9,55 @@ require('dotenv').config();
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Middleware
 app.use(cors());
 app.use(express.json());
 
-// Serve static files from the 'frontend' folder
-app.use(express.static(path.join(__dirname, '../frontend')));
-
-// Serve index.html for the root URL
-app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/index.html'));
-});
-
-
 // Helper function to login and get browser session
 async function loginToSamvidha(username, password) {
-  
-  const chromePath = findChromeBinary();
-
-  const browser = await puppeteer.launch({
-    
+  const launchOptions = {
     headless: 'new',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
       '--disable-dev-shm-usage',
       '--disable-accelerated-2d-canvas',
-      '--no-first-run',
-      '--no-zygote',
-      '--disable-gpu'
-    ],
-    executablePath: process.env.CHROME_BIN || undefined
-  });
-  console.log('Browser launched successfully');
+      '--disable-gpu',
+      '--window-size=1920x1080'
+    ]
+  };
 
+  // Add executable path if running on Render
+  if (process.env.CHROME_BIN) {
+    launchOptions.executablePath = process.env.CHROME_BIN;
+  }
+
+  const browser = await puppeteer.launch(launchOptions);
   const page = await browser.newPage();
 
-  // Set a user agent to mimic a real browser
-  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36');
+  // Set viewport
+  await page.setViewport({ width: 1920, height: 1080 });
 
-  try {
-    // Navigate to login page
-    console.log('Navigating to login page...');
-    await page.goto('https://samvidha.iare.ac.in/', { waitUntil: 'networkidle2', timeout: 60000 });
+  // Set user agent
+  await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36');
 
-    // Check for network errors or redirects
-    const currentUrl = page.url();
-    console.log('Current URL after navigation:', currentUrl);
-    if (!currentUrl.includes('samvidha.iare.ac.in')) {
-      throw new Error('Failed to reach login page. Possible network issue or redirect.');
-    }
+  // Navigate to login page
+  await page.goto('https://samvidha.iare.ac.in/', { waitUntil: 'networkidle2' });
 
-    // Check if login form exists
-    const loginFormExists = await page.$('input[name="txt_uname"]') !== null;
-    if (!loginFormExists) {
-      await page.screenshot({ path: 'login-page-error.png' });
-      throw new Error('Login form not found. The page structure may have changed.');
-    }
+  // Enter credentials
+  await page.type('input[name="txt_uname"]', username);
+  await page.type('input[name="txt_pwd"]', password);
+  await page.click('button#but_submit');
 
-    // Enter credentials
-    console.log('Entering credentials...');
-    await page.type('input[name="txt_uname"]', username);
-    await page.type('input[name="txt_pwd"]', password);
-    await page.click('button#but_submit');
+  // Wait for navigation
+  await page.waitForNavigation({ waitUntil: 'networkidle2' });
 
-    // Wait for navigation
-    console.log('Waiting for navigation after login...');
-    await page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 });
-
-    // Check for login failure
-    if (page.url().includes('login')) {
-      throw new Error('Invalid credentials');
-    }
-
-    return { browser, page };
-  } catch (error) {
+  // Check for login failure
+  if (page.url().includes('login')) {
     await browser.close();
-    throw error;
+    throw new Error('Invalid credentials');
   }
+
+  return { browser, page };
 }
 
 app.post('/fetch-attendance', async (req, res) => {
@@ -102,18 +73,9 @@ app.post('/fetch-attendance', async (req, res) => {
     browser = b;
 
     // Navigate to biometric page
-    console.log('Navigating to biometric page...');
-    await page.goto('https://samvidha.iare.ac.in/home?action=std_bio', { waitUntil: 'networkidle2', timeout: 60000 });
-
-    // Check if attendance table exists
-    const tableExists = await page.$('table tbody tr') !== null;
-    if (!tableExists) {
-      await page.screenshot({ path: 'biometric-page-error.png' });
-      throw new Error('Attendance table not found. The page structure may have changed.');
-    }
+    await page.goto('https://samvidha.iare.ac.in/home?action=std_bio', { waitUntil: 'networkidle2' });
 
     // Scrape detailed attendance data
-    console.log('Scraping attendance data...');
     const attendanceData = await page.evaluate(() => {
       const rows = Array.from(document.querySelectorAll('table tbody tr'));
       const attendanceDetails = rows.map(row => ({
@@ -180,24 +142,14 @@ app.post('/fetch-class-attendance', async (req, res) => {
     browser = b;
 
     // Navigate to course content page
-    console.log('Navigating to course content page...');
-    await page.goto('https://samvidha.iare.ac.in/home?action=course_content', { waitUntil: 'networkidle2', timeout: 60000 });
-
+    await page.goto('https://samvidha.iare.ac.in/home?action=course_content', { waitUntil: 'networkidle2' });
     // Wait for the table or fallback to a longer wait
-    console.log('Waiting for attendance table...');
     try {
       await page.waitForSelector('table.table', { timeout: 10000 });
     } catch (e) {
       await page.waitForTimeout(3000); // fallback wait
-      const tableExists = await page.$('table.table') !== null;
-      if (!tableExists) {
-        await page.screenshot({ path: 'course-content-page-error.png' });
-        throw new Error('Course attendance table not found. The page structure may have changed.');
-      }
     }
-
     // Scrape attendance data from the table
-    console.log('Scraping class attendance data...');
     const attendanceRows = await page.evaluate(() => {
       const rows = Array.from(document.querySelectorAll('table.table tbody tr'));
       return rows.map(row => {
