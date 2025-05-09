@@ -21,29 +21,14 @@ app.get('/', (req, res) => {
   res.sendFile(path.join(__dirname, '../frontend/index.html'));
 });
 
-// Helper function to find Chrome binary dynamically
-function findChromeBinary() {
-  const chromePath = puppeteer.executablePath();
-
-  console.log('Resolved Chrome path:', chromePath);
-
-  if (!fs.existsSync(chromePath)) {
-    throw new Error(`Chrome binary not found at ${chromePath}. Make sure Puppeteer installed Chrome correctly.`);
-  }
-
-  return chromePath;
-}
 
 // Helper function to login and get browser session
 async function loginToSamvidha(username, password) {
-  // Debugging: Log environment variables
-  console.log('PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
-  console.log('PUPPETEER_CACHE_DIR:', process.env.PUPPETEER_CACHE_DIR);
-
+  
   const chromePath = findChromeBinary();
 
   const browser = await puppeteer.launch({
-    executablePath: chromePath,
+    executablePath: process.env.CHROME_BIN || null,
     headless: true,
     args: [
       '--no-sandbox',
