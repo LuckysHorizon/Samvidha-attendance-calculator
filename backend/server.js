@@ -2,6 +2,7 @@ const express = require('express');
 const puppeteer = require('puppeteer'); // Use puppeteer instead of puppeteer-core
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
@@ -21,7 +22,18 @@ app.get('/', (req, res) => {
 
 // Helper function to login and get browser session
 async function loginToSamvidha(username, password) {
+  // Debugging: Log environment variables and check if Chrome binary exists
+  console.log('PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
+  console.log('PUPPETEER_CACHE_DIR:', process.env.PUPPETEER_CACHE_DIR);
+
+  const chromePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/opt/render/.cache/puppeteer/chrome/linux-131.0.6778.204/chrome-linux64/chrome';
+  
+  if (!fs.existsSync(chromePath)) {
+    throw new Error(`Chrome binary not found at ${chromePath}. Please ensure the binary exists and the path is correct.`);
+  }
+
   const browser = await puppeteer.launch({
+    executablePath: chromePath, // Explicitly set the Chrome binary path
     headless: true,
     args: [
       '--no-sandbox',
