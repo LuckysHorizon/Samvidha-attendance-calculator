@@ -28,8 +28,8 @@ async function loginToSamvidha(username, password) {
   const chromePath = findChromeBinary();
 
   const browser = await puppeteer.launch({
-    executablePath: process.env.CHROME_BIN || null,
-    headless: true,
+    
+    headless: 'new',
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -38,7 +38,8 @@ async function loginToSamvidha(username, password) {
       '--no-first-run',
       '--no-zygote',
       '--disable-gpu'
-    ]
+    ],
+    executablePath: process.env.CHROME_BIN || undefined
   });
   console.log('Browser launched successfully');
 
