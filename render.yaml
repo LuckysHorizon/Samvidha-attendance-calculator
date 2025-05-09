@@ -11,5 +11,9 @@ services:
         value: 10000
       - key: CHROME_BIN
         value: /opt/render/.cache/puppeteer/chrome/linux-131.0.6778.204/chrome-linux64/chrome
+      - key: PUPPETEER_SKIP_CHROMIUM_DOWNLOAD
+        value: "true"
+      - key: PUPPETEER_EXECUTABLE_PATH
+        value: /opt/render/.cache/puppeteer/chrome/linux-131.0.6778.204/chrome-linux64/chrome
     healthCheckPath: /
     autoDeploy: true 
