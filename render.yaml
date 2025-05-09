@@ -1,36 +1,15 @@
 services:
   - type: web
-    name: samvidha-attendance-calculator
-    env: node
-    plan: free
-    buildCommand: npm install
-    startCommand: npm start
-    preDeploy:
-      - apt-get update && apt-get install -y \
-          libnss3 \
-          libatk1.0-0 \
-          libatk-bridge2.0-0 \
-          libx11-6 \
-          libx11-xcb1 \
-          libxcb1 \
-          libxcomposite1 \
-          libxcursor1 \
-          libxdamage1 \
-          libxext6 \
-          libxi6 \
-          libxtst6 \
-          libpangocairo-1.0-0 \
-          libpango-1.0-0 \
-          libcairo2 \
-          libdrm2 \
-          libgbm1 \
-          libasound2 \
-          libatspi2.0-0 \
-          libwayland-client0 \
-          libwayland-egl1 \
-          libwayland-server0 \
-          libxkbcommon0 \
-          fonts-liberation
+    name: attendance-calculator
+    runtime: node
+    buildCommand: npm install && cd backend && npx puppeteer browsers install chrome
+    startCommand: cd backend && node server.js
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: PORT
         value: 10000
+      - key: CHROME_BIN
+        value: /opt/render/.cache/puppeteer/chrome/linux-131.0.6778.204/chrome-linux64/chrome
+    healthCheckPath: /
+    autoDeploy: true 
