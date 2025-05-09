@@ -2,7 +2,7 @@ services:
   - type: web
     name: attendance-calculator
     runtime: node
-    buildCommand: npm install && cd backend && npx puppeteer browsers install chrome
+    buildCommand: npm install && cd backend && npm install && npx puppeteer browsers install chrome
     startCommand: cd backend && node server.js
     envVars:
       - key: NODE_ENV
